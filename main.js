@@ -8,7 +8,7 @@ async function loadAudio() {
 
     audio = document.getElementById("cyberaudio");
     audio.src = url;
-    
+    audio.volume = 0;
 }
 
 loadAudio();
@@ -129,18 +129,7 @@ function AudioVisualizer() {
 }
 
 
-function updateVolumeMeter(rotation) {
-	const volume = (rotation / 150) * 100;
-    
-	leds.forEach((led, index) => {
-		const ledThreshold = (index + 1) * 10;
-		const ledBrightness = Math.min(
-			1,
-			Math.max(0, (volume - (ledThreshold - 10)) / 10)
-		);
-		led.style.opacity = 0.1 + ledBrightness * 0.9;
-	});
-}
+
 
 document.querySelectorAll('.knob').forEach(knob => {
     
@@ -164,16 +153,17 @@ document.querySelectorAll('.knob').forEach(knob => {
         
         knob.style.transform = `rotate(${rotation}deg)`;
         startAngle = currentAngle;
+        let vol = rotation / 150;
 		
         if(knob.dataset.control == 'volume') {
-            updateVolumeMeter(rotation);
+            audio.volume = vol;
+            audio.play();
+            AudioVisualizer();
         }
 
-        let vol = rotation / 150;
         
-        audio.play();
-        audio.volume = vol;
-         AudioVisualizer();
+        
+        
 
    })
 
@@ -196,15 +186,17 @@ document.querySelectorAll('.knob').forEach(knob => {
     
     knob.style.transform = `rotate(${rotation}deg)`;
     startAngle = currentAngle;
-
-    if(knob.dataset.control == 'volume') {
-        updateVolumeMeter(rotation);
-    }
-
     let vol = rotation / 150;
 
-        audio.play();
+    if(knob.dataset.control == 'volume') {
         audio.volume = vol;
+        audio.play();
+        AudioVisualizer();
+    }
+
+    
+
+        
     
    })
 
