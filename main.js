@@ -43,7 +43,7 @@ document.querySelectorAll('.fader-handle').forEach(handle => {
 
        if(newTop % 7 == 0) {
         speed = 3 - (newTop / 140) * 2;
-          // 3.0 - 1.0 = 2.0, и масштабируем на 140px
+         
        }  
        
         
