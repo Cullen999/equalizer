@@ -43,14 +43,13 @@ document.querySelectorAll('.fader-handle').forEach(handle => {
 
        if(newTop % 7 == 0) {
         speed = 3 - (newTop / 140) * 2;
-         
        }  
        
         
        if(speed) {
         animationDuration = (4 - speed);
-
-       audio.playbackRate = speed; 
+        
+       if(handle.dataset.control == "speedL" || handle.dataset.control == "speedR") audio.playbackRate = speed; 
        handle.dataset.control == "speedL" ? spiner[0].style.animation = `spin ${animationDuration}s linear infinite` : '';
        handle.dataset.control == "speedL" ? speedDisplay[0].textContent = `Speed: ${speed.toFixed(1)}x` : '';
        handle.dataset.control == "speedR" ? spiner[1].style.animation = `spin ${animationDuration}s linear infinite` : '';
