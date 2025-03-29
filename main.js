@@ -1,5 +1,20 @@
-let audio = document.getElementById('cyberaudio')
+
+
+let audio;
+async function loadAudio() {
+    const response = await fetch("https://cullen999.github.io/equalizer/UltraCyberBass.mp3");
+    const blob = await response.blob();
+    const url = URL.createObjectURL(blob);
+
+    audio = document.getElementById("cyberaudio");
+    audio.src = url;
+    
+}
+
+loadAudio();
+
 let animationDuration = 2.0;
+
 
 
 document.querySelectorAll('.fader-handle').forEach(handle => {
@@ -71,6 +86,49 @@ document.querySelectorAll('.vinyl').forEach(vinyl => {
 })
 
 const leds = Array.from(document.querySelectorAll(".led-light")).reverse();
+let audioContext = null;
+
+function AudioVisualizer() {
+        if(audioContext) return;
+    
+        audioContext = new window.AudioContext();
+    
+        let src = audioContext.createMediaElementSource(audio);
+        let analyser = audioContext.createAnalyser();
+        analyser.fftSize = 32;
+        const bufferLength = analyser.frequencyBinCount;
+        const dataArray = new Uint8Array(bufferLength);
+        src.connect(analyser);
+        analyser.connect(audioContext.destination);
+    
+       
+    
+
+    function up() {
+        if(!analyser) return;
+        analyser.getByteFrequencyData(dataArray);
+
+        let averageVolume = dataArray.reduce((acc, freq) => acc + freq, 0) / bufferLength;
+        const lvl = Math.round((averageVolume / 255) * leds.length);
+
+        leds.forEach((light, index) => {
+            light.style.opacity = index < lvl ? 1 : 0.2;
+        });
+
+        requestAnimationFrame(up);
+    }
+
+    audio.onplay = () => {
+        if (audioContext.state === "suspended") {
+            audioContext.resume();
+        }
+            up();
+        
+        
+    };
+}
+
+
 function updateVolumeMeter(rotation) {
 	const volume = (rotation / 150) * 100;
     
@@ -89,6 +147,7 @@ document.querySelectorAll('.knob').forEach(knob => {
    let startAngle =  Math.atan2(0, 1);
    let rotation = 0;
    let isDragging = false;
+
 
    knob.addEventListener('mousedown', (e) => {
         isDragging = true;
@@ -111,15 +170,16 @@ document.querySelectorAll('.knob').forEach(knob => {
         }
 
         let vol = rotation / 150;
-
+        
         audio.play();
         audio.volume = vol;
+         AudioVisualizer();
 
    })
 
    document.addEventListener('mousemove', (e) => {
     if(!isDragging) return;
-
+    
     const rect = knob.getBoundingClientRect();
         
     const centerX = rect.left + rect.width / 2;
