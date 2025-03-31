@@ -5,6 +5,12 @@ const knob = document.querySelectorAll('.knob');
 const lights = Array.from(document.querySelectorAll('.led-light')).reverse();
 const audio = document.getElementById('audio');
 
+
+let speedVinLeft = 3.0;
+let speedVinRight = 3.0;
+
+
+
 // fader
 
 handle.forEach(handl => {
@@ -36,16 +42,21 @@ handle.forEach(handl => {
         // speed display
 
         let speedDis = 3 - (startTop * 2 / 140);
+        
+        // audio speed
+        if(handl.dataset.control != 'mix') audio.playbackRate = speedDis;  
+          
 
         if(handl.dataset.control == 'speedL') speedDisplay[0].textContent = `Speed: ${speedDis.toFixed(1)}x`;
         if(handl.dataset.control == 'speedR') speedDisplay[1].textContent = `Speed: ${speedDis.toFixed(1)}x`;
 
         // speed vinyl
+        if(handl.dataset.control == 'speedR') speedVinRight = 1 + (startTop * 2 / 140);
+        if(handl.dataset.control == 'speedL') speedVinLeft = 1 + (startTop * 2 / 140);
+       
 
-        let speedVin = 1 + (startTop * 2 / 140)
-
-        if(handl.dataset.control == 'speedL') speedVinyl[0].style.animation = `spin ${speedVin.toFixed(1)}s linear infinite`;
-        if(handl.dataset.control == 'speedR') speedVinyl[1].style.animation = `spin ${speedVin.toFixed(1)}s linear infinite`
+        speedVinyl[0].style.animation = `spin ${speedVinLeft.toFixed(1)}s linear infinite`;
+        speedVinyl[1].style.animation = `spin ${speedVinRight.toFixed(1)}s linear infinite`
        
         
     })
@@ -68,25 +79,74 @@ function equalizer(volumeMeter, index, light) {
     let diff = volumeMeter - index;
 
     if (diff < 0 && diff >= -30) {
-            console.log(volumeMeter)
             if (intervalMap.size >= 3) {
                     
-                intervalMap.forEach(id => clearInterval(id))
+                intervalMap.forEach(id => clearInterval(id.id))
                 intervalMap.clear();
                 
             }
 
             if(volumeMeter >= 10 && volumeMeter < 80) {
-                let id = setInterval(() => {
+                let callback = () => {
                     light.style.opacity = light.style.opacity === "0.1" ? "0.9" : "0.1"; 
-                }, diff >= -10 ? 400 : diff >= -20 ? 700 : 900);
+                }
+
+                let delay = diff >= -10 ? 400 : diff >= -20 ? 700 : 900;
+                let id = setInterval(callback, delay);
                 
-                intervalMap.set(index, id); 
+                intervalMap.set(index, {id, callback, delay, light}); 
             } 
             
             
     }
 }
+
+
+speedVinyl.forEach(vinyl => {
+    let stopLeft = false;
+    let stopRight = false;
+    vinyl.addEventListener('mousedown', () => {
+        
+        if(vinyl.id == 'leftVinyl') {
+            vinyl.style.animation = `spin 0s linear infinite`;
+            stopLeft = true
+        }
+        if(vinyl.id == 'rightVinyl') {
+            vinyl.style.animation = `spin 0s linear infinite`;
+            stopRight = true;
+        } 
+        audio.pause();
+        intervalMap.forEach(id => {
+            
+            clearInterval(id.id);
+            
+            id.light.style.opacity = '0.1';
+        });
+
+       
+    });
+
+    document.addEventListener('mouseup', () => {
+        if(stopLeft || stopRight) {
+            audio.play();
+            intervalMap.forEach((value, key) => {
+                let newId = setInterval(value.callback, value.delay );
+                intervalMap.set(key, {id: newId, callback: value.callback, delay: value.delay, light: value.light})
+            })
+        }
+
+        if(stopLeft) {
+            vinyl.style.animation = `spin ${speedVinLeft}s linear infinite`;
+            stopLeft = false;
+        }
+        if(stopRight) {
+            vinyl.style.animation = `spin ${speedVinRight}s linear infinite`;
+            stopRight = false;
+        }
+        
+    })
+})
+
 
 // knob 
 
