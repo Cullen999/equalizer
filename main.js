@@ -127,7 +127,7 @@ knob.forEach(knb => {
                 lights.forEach((light, i) => {
                     let index = (i + 1) * 10;
                     
-                    volumeMeter - index >= 0 ? light.style.opacity = '0.9' : light.style.opacity = '0.1';
+                    volumeMeter - index >= 0 ? light.style.opacity = '0.9' : light.style.opacity = '0.0';
                     
                     equalizer(volumeMeter, index, light);
                      
@@ -168,7 +168,7 @@ knob.forEach(knb => {
                 lights.forEach((light, i) => {
                     let index = (i + 1) * 10;
                     
-                    volumeMeter - index >= 0 ? light.style.opacity = '0.9' : light.style.opacity = '0.1';
+                    volumeMeter - index >= 0 ? light.style.opacity = '0.9' : light.style.opacity = '0.0';
     
                     equalizer(volumeMeter, index, light)
                 });
