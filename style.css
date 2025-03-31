@@ -63,7 +63,7 @@ body {
 	justify-content: center;
 	align-items: center;
 	cursor: pointer;
-	animation: spin 2s linear infinite;
+	animation: spin 3s linear infinite;
 }
 
 .vinyl::after {
